@@ -1,6 +1,7 @@
 # Student Registration System
 
 ## ITST 302 – Client-Server Technologies
+
 ### Week 4 / Mini Project 03
 
 **Student Name:** [Your Name]  
@@ -128,20 +129,20 @@ After the record is successfully saved, Laravel creates a success flash message 
 
 The system uses server-side validation to make sure that the information submitted by the user is acceptable.
 
-| Field | Validation Rule | Purpose |
-|---|---|---|
-| `student_id` | `required`, `string`, `max:20`, `unique:students,student_id` | Makes sure every student has a unique Student ID. |
-| `first_name` | `required`, `string`, `max:100` | Makes the student's first name required. |
-| `middle_name` | `nullable`, `string`, `max:100` | Allows the middle name to be left blank. |
-| `last_name` | `required`, `string`, `max:100` | Requires the student's surname. |
-| `email` | `required`, `email`, `max:255`, `unique:students,email` | Checks the email format and prevents duplicate emails. |
-| `mobile_number` | `required`, `string`, `regex:/^[0-9+\-\s()]{7,20}$/` | Prevents invalid characters in the contact number. |
-| `gender` | `required`, `in:Male,Female,Other` | Limits the available gender choices. |
-| `date_of_birth` | `required`, `date`, `before:today`, `after:1900-01-01` | Makes sure the date is valid and is in the past. |
-| `program` | `required`, `string`, `max:100` | Requires the student's academic program. |
-| `year_level` | `required`, `in:1st Year,2nd Year,3rd Year,4th Year` | Limits the year level to the available choices. |
-| `address` | `required`, `string`, `max:500` | Requires the student's home address. |
-| `profile_picture` | `required`, `image`, `mimes:jpg,jpeg,png`, `max:2048` | Allows only supported image formats up to 2MB. |
+| Field             | Validation Rule                                              | Purpose                                                |
+| ----------------- | ------------------------------------------------------------ | ------------------------------------------------------ |
+| `student_id`      | `required`, `string`, `max:20`, `unique:students,student_id` | Makes sure every student has a unique Student ID.      |
+| `first_name`      | `required`, `string`, `max:100`                              | Makes the student's first name required.               |
+| `middle_name`     | `nullable`, `string`, `max:100`                              | Allows the middle name to be left blank.               |
+| `last_name`       | `required`, `string`, `max:100`                              | Requires the student's surname.                        |
+| `email`           | `required`, `email`, `max:255`, `unique:students,email`      | Checks the email format and prevents duplicate emails. |
+| `mobile_number`   | `required`, `string`, `regex:/^[0-9+\-\s()]{7,20}$/`         | Prevents invalid characters in the contact number.     |
+| `gender`          | `required`, `in:Male,Female,Other`                           | Limits the available gender choices.                   |
+| `date_of_birth`   | `required`, `date`, `before:today`, `after:1900-01-01`       | Makes sure the date is valid and is in the past.       |
+| `program`         | `required`, `string`, `max:100`                              | Requires the student's academic program.               |
+| `year_level`      | `required`, `in:1st Year,2nd Year,3rd Year,4th Year`         | Limits the year level to the available choices.        |
+| `address`         | `required`, `string`, `max:500`                              | Requires the student's home address.                   |
+| `profile_picture` | `required`, `image`, `mimes:jpg,jpeg,png`, `max:2048`        | Allows only supported image formats up to 2MB.         |
 
 The validation rules are handled by Laravel before the information reaches the controller and database. This prevents invalid information from being stored.
 
@@ -186,24 +187,24 @@ erDiagram
 
 ### Students Table Structure
 
-| Column | Data Type | Key | Nullable | Description |
-|---|---|---|---|---|
-| `id` | BIGINT UNSIGNED | Primary Key | No | Unique record ID |
-| `student_id` | VARCHAR(20) | Unique | No | School Student ID |
-| `first_name` | VARCHAR(100) | — | No | Student first name |
-| `middle_name` | VARCHAR(100) | — | Yes | Student middle name |
-| `last_name` | VARCHAR(100) | — | No | Student surname |
-| `email` | VARCHAR(255) | Unique | No | Student email |
-| `mobile_number` | VARCHAR(20) | — | No | Contact number |
-| `gender` | ENUM | — | No | Male, Female, or Other |
-| `date_of_birth` | DATE | — | No | Student birth date |
-| `program` | VARCHAR(100) | — | No | Degree program |
-| `year_level` | VARCHAR(20) | — | No | Current year level |
-| `address` | TEXT | — | No | Complete home address |
-| `profile_picture` | VARCHAR(255) | — | No | Stored image path |
-| `status` | ENUM | — | No | Active, inactive, or archived |
-| `created_at` | TIMESTAMP | — | Yes | Date record was created |
-| `updated_at` | TIMESTAMP | — | Yes | Date record was updated |
+| Column            | Data Type       | Key         | Nullable | Description                   |
+| ----------------- | --------------- | ----------- | -------- | ----------------------------- |
+| `id`              | BIGINT UNSIGNED | Primary Key | No       | Unique record ID              |
+| `student_id`      | VARCHAR(20)     | Unique      | No       | School Student ID             |
+| `first_name`      | VARCHAR(100)    | —           | No       | Student first name            |
+| `middle_name`     | VARCHAR(100)    | —           | Yes      | Student middle name           |
+| `last_name`       | VARCHAR(100)    | —           | No       | Student surname               |
+| `email`           | VARCHAR(255)    | Unique      | No       | Student email                 |
+| `mobile_number`   | VARCHAR(20)     | —           | No       | Contact number                |
+| `gender`          | ENUM            | —           | No       | Male, Female, or Other        |
+| `date_of_birth`   | DATE            | —           | No       | Student birth date            |
+| `program`         | VARCHAR(100)    | —           | No       | Degree program                |
+| `year_level`      | VARCHAR(20)     | —           | No       | Current year level            |
+| `address`         | TEXT            | —           | No       | Complete home address         |
+| `profile_picture` | VARCHAR(255)    | —           | No       | Stored image path             |
+| `status`          | ENUM            | —           | No       | Active, inactive, or archived |
+| `created_at`      | TIMESTAMP       | —           | Yes      | Date record was created       |
+| `updated_at`      | TIMESTAMP       | —           | Yes      | Date record was updated       |
 
 The `id` column is the primary key and is automatically incremented. The `student_id` and `email` columns have unique constraints so that duplicate student records cannot use the same values.
 
@@ -213,25 +214,7 @@ The `id` column is the primary key and is automatically incremented. The `studen
 
 The registration process follows this flow:
 
-```mermaid
-flowchart TD
-    A([User Opens Registration Page]) --> B[Display Registration Form]
-    B --> C[Fill in Student Information]
-    C --> D[Select Profile Picture]
-    D --> E[Preview Image]
-    E --> F[Submit Form]
-    F --> G{Laravel Validation}
-
-    G -- No --> H[Return to Form]
-    H --> I[Display Validation Errors]
-    I --> C
-
-    G -- Yes --> J[Upload Profile Picture]
-    J --> K[Insert Student Record into MySQL]
-    K --> L[Display Success Message]
-    L --> M[Redirect to Student Profile]
-    M --> N([Display Student Information])
-```
+````
 
 ### Registration Process
 
@@ -324,7 +307,7 @@ Another problem occurred when running the Laravel migrations. Laravel returned a
 
 ```text
 SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost'
-```
+````
 
 The problem was caused by the MySQL root account having a password while the Laravel `.env` file did not have the correct password.
 
@@ -424,23 +407,23 @@ Overall, the project gave me a better understanding of how a client-server appli
 
 ## 12. References
 
-Laravel. (2026). *Laravel documentation: Validation and form requests*.  
+Laravel. (2026). _Laravel documentation: Validation and form requests_.  
 https://laravel.com/docs/validation
 
-Laravel. (2026). *Laravel documentation: File storage and public disks*.  
+Laravel. (2026). _Laravel documentation: File storage and public disks_.  
 https://laravel.com/docs/filesystem
 
-Laravel. (2026). *Laravel documentation: Eloquent ORM and database migrations*.  
+Laravel. (2026). _Laravel documentation: Eloquent ORM and database migrations_.  
 https://laravel.com/docs/eloquent
 
-MDN Web Docs. (2026). *Using files from web applications and FileReader API*. Mozilla.  
+MDN Web Docs. (2026). _Using files from web applications and FileReader API_. Mozilla.  
 https://developer.mozilla.org/en-US/docs/Web/API/File_API/Using_files_from_web_applications
 
-MySQL. (2026). *MySQL 8.0 reference manual: Data types and table constraints*. Oracle Corporation.  
+MySQL. (2026). _MySQL 8.0 reference manual: Data types and table constraints_. Oracle Corporation.  
 https://dev.mysql.com/doc/refman/8.0/en/
 
-PHP Documentation Group. (2026). *PHP manual: Handling file uploads and POST method uploads*. The PHP Group.  
+PHP Documentation Group. (2026). _PHP manual: Handling file uploads and POST method uploads_. The PHP Group.  
 https://www.php.net/manual/en/features.file-upload.post-method.php
 
-Tailwind Labs. (2026). *Tailwind CSS documentation: Utility-first CSS framework*.  
+Tailwind Labs. (2026). _Tailwind CSS documentation: Utility-first CSS framework_.  
 https://tailwindcss.com/docs
