@@ -4,7 +4,7 @@
 
 ### Week 4 / Mini Project 03
 
-**Student Name:** [Your Name]  
+**Student Name:** Ernest James R. De Leon  
 **Year & Section:** BSIT 3rd Year
 
 ---
@@ -214,8 +214,6 @@ The `id` column is the primary key and is automatically incremented. The `studen
 
 The registration process follows this flow:
 
-````
-
 ### Registration Process
 
 1. The user opens the registration page.
@@ -307,7 +305,7 @@ Another problem occurred when running the Laravel migrations. Laravel returned a
 
 ```text
 SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost'
-````
+```
 
 The problem was caused by the MySQL root account having a password while the Laravel `.env` file did not have the correct password.
 
