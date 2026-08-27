@@ -1,333 +1,264 @@
 # Student Registration System — ITST 302 Week 4 Laboratory Activity
 
 **Course:** ITST 302 – Client-Server Technologies  
-**Activity:** Week 4 Laboratory Activity / Mini Project 03  
-**Project Name:** Student Registration System  
-**Framework:** Laravel 13 (PHP 8.3+) with MySQL & Tailwind CSS
+**Laboratory Activity:** Week 4 / Mini Project 03  
+**Student Name:** [Your Name]  
+**Year & Section:** BSIT 3rd Year  
 
 ---
 
-## Table of Contents
-
-1. [Introduction](#1-introduction)
-2. [Objectives](#2-objectives)
-3. [Laravel Request Lifecycle](#3-laravel-request-lifecycle)
-4. [Validation Rules](#4-validation-rules)
-5. [Database Design](#5-database-design)
-6. [Flowchart](#6-flowchart)
-7. [Screenshots](#7-screenshots)
-8. [Problems Encountered & Solutions](#8-problems-encountered--solutions)
-9. [Reflection](#9-reflection)
-10. [References](#10-references)
-11. [Setup Instructions](#11-setup-instructions)
-12. [Features & Enhancements Summary](#12-features--enhancements-summary)
+## 1. Project Title
+**Student Registration System with Laravel Forms, Server-Side Validation, and File Storage**
 
 ---
 
-## 1. Introduction
+## 2. Introduction
 
-For our ITST 302 Week 4 laboratory activity, we were tasked to develop a **Student Registration System** using the Laravel framework and MySQL. In real-world university or school portals, student registration is one of the most important client-server features because it handles personal records, academic enrollment, and identification.
+### Purpose of a Student Registration System
+A Student Registration System is a core web application used by schools and universities to enroll students, gather their personal and academic information, and assign them to degree programs. It allows students or registrars to enter key data such as Student ID, complete name, contact information, date of birth, gender, home address, and an official 2x2 profile picture for identification.
 
-The goal of this mini project is to build a working system that allows students to register with their complete details (Student ID, full name, contact info, program, year level, address) and upload a profile picture. The application enforces server-side validation to ensure that records are clean and duplicate-free, stores uploaded images securely using Laravel Storage (`storage/app/public`), saves data into a MySQL `students` table, and presents a confirmation profile page with flash messages after successful submission.
+### Importance of Data Validation
+Data validation ensures that the information entered into the system is complete, correctly formatted, and accurate before it reaches the database. Without validation, users could submit blank forms, invalid email addresses, letters in phone numbers, or fake birth dates. More importantly, server-side validation protects the database from duplicate student records, corrupted data, and malicious file uploads (like PHP scripts disguised as images).
 
----
-
-## 2. Objectives
-
-The objectives for this laboratory activity are:
-
-- Build a responsive student registration form using Laravel Blade templates.
-- Implement server-side validation using Form Requests (`StoreStudentRequest`, `UpdateStudentRequest`).
-- Handle file uploads (JPG/PNG profile pictures up to 2MB) using Laravel Storage and create public symlinks with `php artisan storage:link`.
-- Design and migrate a MySQL `students` table to store all required fields and file paths.
-- Display flash success and error notifications when interacting with the system.
-- Build a student profile page to review registered details and uploaded images.
-- Provide student record management with search, program filters, record editing, archiving, and a print summary view.
+### Role of Registration Systems in Enterprise Applications
+In enterprise and institutional software, the registration module is the entry point for all user data. Enterprise Resource Planning (ERP) systems, Learning Management Systems (LMS), and Student Information Systems (SIS) rely on the registration module to create the primary user profile. If data collected at the registration stage is dirty or unstructured, every downstream system—such as grading, attendance, billing, and graduation auditing—will encounter errors.
 
 ---
 
-## 3. Laravel Request Lifecycle
+## 3. Objectives
 
-Here is how an HTTP request travels through the Laravel application during student registration:
+During this laboratory activity, I accomplished the following learning objectives:
+- Created responsive HTML web forms using Laravel Blade templates (`@csrf`, `enctype="multipart/form-data"`).
+- Implemented server-side data validation using dedicated Laravel Form Request classes (`StoreStudentRequest` and `UpdateStudentRequest`).
+- Configured file uploads for profile pictures (JPG, JPEG, PNG up to 2MB) using Laravel Storage (`storage/app/public`).
+- Created public storage symlinks using the `php artisan storage:link` command.
+- Designed and migrated a relational MySQL database table (`students`) with proper data types, unique keys, and constraints.
+- Displayed session flash messages and per-field inline error messages to guide the user during form submission.
+- Built a student profile page to display registered details and render uploaded images securely.
+- Added student record management features including a searchable directory, program filters, record editing, and print-ready summary sheets.
+
+---
+
+## 4. Laravel Request Lifecycle
+
+When a student submits the registration form, the request moves through Laravel's client-server architecture in the following sequence:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Student as User / Browser
-    participant Public as public/index.php
-    participant Router as routes/web.php
-    participant Request as StoreStudentRequest
-    participant Controller as StudentController
-    participant Storage as Laravel Storage Disk
-    participant Model as Student Model (Eloquent)
-    participant Database as MySQL Database
+    actor User as 1. Browser (Client)
+    participant Route as 2. Route (routes/web.php)
+    participant Request as 3. Validation (StoreStudentRequest)
+    participant Controller as 4. Controller (StudentController)
+    participant Storage as 5. Storage (Laravel Storage Disk)
+    participant Model as 6. Model (Student Eloquent Model)
+    participant DB as 7. Database (MySQL students table)
+    participant View as 8. Response (show.blade.php)
 
-    Student->>Public: Submits Registration Form (POST /students)
-    Public->>Router: Checks route matching POST /students
-    Router->>Request: Passes data through StoreStudentRequest for validation
-
+    User->>Route: Submits form via POST /students with inputs & photo
+    Route->>Request: Passes request data to StoreStudentRequest
+    
     alt Validation Fails
-        Request-->>Student: Redirects back with errors and old input values
+        Request-->>User: 302 Redirect back to form with error messages and old() inputs
     else Validation Passes
-        Request->>Controller: Calls store() method with validated data
-        Controller->>Storage: Saves photo to storage/app/public/profile_pictures
-        Storage-->>Controller: Returns relative path
-        Controller->>Model: Creates new Student record with photo path
-        Model->>Database: INSERT INTO students table
-        Database-->>Model: Saves record and returns new Student ID
-        Controller->>Student: Sets session flash message and redirects to GET /students/{id}
+        Request->>Controller: Sends sanitized and validated data to store() method
+        Controller->>Storage: Uploads image file to storage/app/public/profile_pictures
+        Storage-->>Controller: Returns relative file path string
+        Controller->>Model: Calls Student::create() with student fields and file path
+        Model->>DB: Executes SQL INSERT INTO students table
+        DB-->>Model: Saves record and assigns auto-increment ID
+        Controller->>View: Flashes success message to session and redirects to GET /students/{id}
+        View-->>User: Renders student profile view with details and uploaded photo
     end
-
-    Student->>Router: Loads profile page (GET /students/{id})
-    Router->>Controller: Calls show() method
-    Controller->>Model: Finds student record in MySQL
-    Model-->>Controller: Returns student data
-    Controller-->>Student: Displays resources/views/students/show.blade.php
 ```
 
-### Explanation of Steps:
-
-1. **User Submits Form**: The student fills out the form at `/students/create` and clicks "Register Student". The browser sends a `POST` request with form data, CSRF token, and the image file.
-2. **Routing & Form Request Validation**: `routes/web.php` directs the request to `StoreStudentRequest`. Laravel validates all required fields, checks for duplicate Student IDs and emails in MySQL, and verifies the image format and size.
-3. **If Validation Fails**: Laravel redirects the user back to the form with error messages and their previous inputs (`old()`).
-4. **If Validation Passes**: `StudentController@store` receives the validated input, uploads the image into `storage/app/public/profile_pictures`, and passes the relative path along with student data to `Student::create()`.
-5. **Database Storage & Redirect**: Eloquent inserts the record into the MySQL `students` table. The controller flashes a success message into the session and redirects the user to `/students/{id}` where the newly registered student details and uploaded picture are rendered.
-
----
-
-## 4. Validation Rules
-
-We separated our validation logic into dedicated Form Request classes (`StoreStudentRequest` and `UpdateStudentRequest`) for clean and reusable code:
-
-| Field             | Validation Rule                                                   | Reason / Explanation                                                   |
-| ----------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `student_id`      | `required`, `string`, `max:20`, `unique:students,student_id`      | Required school ID number; must be unique to avoid duplicate records.  |
-| `first_name`      | `required`, `string`, `max:100`                                   | Student given name is required.                                        |
-| `middle_name`     | `nullable`, `string`, `max:100`                                   | Optional middle name or initial.                                       |
-| `last_name`       | `required`, `string`, `max:100`                                   | Student surname is required.                                           |
-| `email`           | `required`, `email`, `max:255`, `unique:students,email`           | Valid email address; must be unique per student.                       |
-| `mobile_number`   | `required`, `string`, `regex:/^[0-9+\-\s()]{7,20}$/`              | Contact number; ensures valid telephone or mobile format.              |
-| `gender`          | `required`, `in:Male,Female,Other`                                | Ensures gender matches allowed selections.                             |
-| `date_of_birth`   | `required`, `date`, `before:today`, `after:1900-01-01`            | Birth date must be a valid date in the past.                           |
-| `program`         | `required`, `string`, `max:100`                                   | Student must select their enrolled academic program.                   |
-| `year_level`      | `required`, `in:1st Year,2nd Year,3rd Year,4th Year`              | Selects valid undergraduate year standing.                             |
-| `address`         | `required`, `string`, `max:500`                                   | Student home/residential address is required.                          |
-| `profile_picture` | `required` (on create), `image`, `mimes:jpg,jpeg,png`, `max:2048` | Photo upload is mandatory for registration; accepts JPG/PNG up to 2MB. |
+### Step-by-Step Explanation:
+1. **Browser**: The user fills out the form at `/students/create`, selects a photo, and clicks the submit button, sending an HTTP `POST` request with form data and the `@csrf` token.
+2. **Route**: `routes/web.php` catches the `POST /students` request and points it to `StudentController@store`.
+3. **Validation**: Before entering the controller method, Laravel resolves `StoreStudentRequest` to check all required fields, format rules, unique constraints, and image size limits. If any rule fails, Laravel automatically redirects back with error messages.
+4. **Controller**: If validation passes, `StudentController@store()` receives the validated data.
+5. **Storage**: The controller saves the uploaded file into `storage/app/public/profile_pictures` and gets the generated path string.
+6. **Model**: The `Student` Eloquent Model maps the validated data and photo path to table attributes.
+7. **Database**: Eloquent executes the SQL `INSERT` statement into the MySQL `students` table.
+8. **Response**: The controller sets a flash success notification in the session and redirects the browser to `GET /students/{id}`, where `show.blade.php` displays the newly saved profile.
 
 ---
 
-## 5. Database Design
+## 5. Validation Rules
 
-The application uses MySQL with a primary `students` table and supporting tables created via Laravel migrations.
+The following validation rules are defined in `StoreStudentRequest` to ensure data integrity and security:
+
+| Field | Validation Rule | Why This Rule is Important |
+|---|---|---|
+| `student_id` | `required`, `string`, `max:20`, `unique:students,student_id` | **Required & Unique Constraint**: Every student must have a Student ID, and it must be unique in the database to prevent duplicate enrollments. |
+| `first_name` | `required`, `string`, `max:100` | **Required Field**: Student's first name is mandatory for official records. |
+| `middle_name` | `nullable`, `string`, `max:100` | **Optional Field**: Allows students with no middle name to submit without errors. |
+| `last_name` | `required`, `string`, `max:100` | **Required Field**: Surname is required for identification and alphabetical listing. |
+| `email` | `required`, `email`, `max:255`, `unique:students,email` | **Email & Unique Validation**: Ensures the email is in a valid format (`name@domain.com`) and not already used by another student. |
+| `mobile_number` | `required`, `string`, `regex:/^[0-9+\-\s()]{7,20}$/` | **Numeric / Format Validation**: Prevents letters and junk characters in contact numbers while supporting standard phone formats. |
+| `gender` | `required`, `in:Male,Female,Other` | **Restricted Values**: Restricts input to valid choices from the dropdown. |
+| `date_of_birth` | `required`, `date`, `before:today`, `after:1900-01-01` | **Date Validation**: Ensures the birth date is a valid calendar date strictly in the past. |
+| `program` | `required`, `string`, `max:100` | **Required Field**: Ensures the student chooses their degree program. |
+| `year_level` | `required`, `in:1st Year,2nd Year,3rd Year,4th Year` | **Restricted Values**: Ensures the student belongs to a valid undergraduate year level. |
+| `address` | `required`, `string`, `max:500` | **Required Field**: Captures physical residence for student records. |
+| `profile_picture` | `required`, `image`, `mimes:jpg,jpeg,png`, `max:2048` | **Image & File Size Restriction**: Restricts upload to safe image formats (`.jpg`, `.jpeg`, `.png`) and limits file size to **2MB (2048 KB)** to prevent server disk overflow and block malicious executable files. |
+
+---
+
+## 6. Database Design
+
+### Entity-Relationship Diagram (ERD)
 
 ```mermaid
 erDiagram
     STUDENTS {
-        bigint id PK "Auto Increment"
-        string student_id UK "Unique (e.g. 2026-00001)"
-        string first_name "First Name"
-        string middle_name "Middle Name (Nullable)"
-        string last_name "Last Name"
-        string email UK "Unique Email Address"
-        string mobile_number "Mobile Number"
+        bigint id PK "Primary Key (Auto Increment)"
+        string student_id UK "Unique Student ID (e.g. 2026-00001)"
+        string first_name "First Name (VARCHAR 100)"
+        string middle_name "Middle Name (VARCHAR 100, Nullable)"
+        string last_name "Last Name (VARCHAR 100)"
+        string email UK "Unique Email Address (VARCHAR 255)"
+        string mobile_number "Mobile Contact Number (VARCHAR 20)"
         enum gender "Male, Female, Other"
-        date date_of_birth "Birth Date"
-        string program "Enrolled Program"
-        string year_level "1st Year to 4th Year"
-        text address "Home Address"
-        string profile_picture "File path in storage"
+        date date_of_birth "Date of Birth (DATE)"
+        string program "Degree Program (VARCHAR 100)"
+        string year_level "Year Standing (VARCHAR 20)"
+        text address "Complete Home Address (TEXT)"
+        string profile_picture "Relative Image Storage Path (VARCHAR 255)"
         enum status "active, inactive, archived"
-        timestamp created_at "Registration Timestamp"
+        timestamp created_at "Creation Timestamp"
         timestamp updated_at "Update Timestamp"
     }
 
     USERS {
-        bigint id PK "Auto Increment"
-        string name "User Name"
-        string email UK "User Email"
-        string password "Hashed Password"
-        timestamp created_at "Created Timestamp"
+        bigint id PK "Primary Key (Auto Increment)"
+        string name "User Name (VARCHAR 255)"
+        string email UK "User Email (VARCHAR 255)"
+        string password "Hashed Password (VARCHAR 255)"
+        timestamp created_at "Creation Timestamp"
+        timestamp updated_at "Update Timestamp"
     }
 ```
 
-### Table Structure: `students`
+### Table Structure & Constraints: `students` Table
 
-```sql
-CREATE TABLE `students` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `student_id` varchar(20) NOT NULL UNIQUE,
-  `first_name` varchar(100) NOT NULL,
-  `middle_name` varchar(100) DEFAULT NULL,
-  `last_name` varchar(100) NOT NULL,
-  `email` varchar(255) NOT NULL UNIQUE,
-  `mobile_number` varchar(20) NOT NULL,
-  `gender` enum('Male','Female','Other') NOT NULL,
-  `date_of_birth` date NOT NULL,
-  `program` varchar(100) NOT NULL,
-  `year_level` varchar(20) NOT NULL,
-  `address` text NOT NULL,
-  `profile_picture` varchar(255) NOT NULL,
-  `status` enum('active','inactive','archived') NOT NULL DEFAULT 'active',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
-);
-```
+| Column Name | Data Type | Key / Index | Nullable | Default Value | Constraints & Description |
+|---|---|---|---|---|---|
+| `id` | `BIGINT UNSIGNED` | `PRIMARY KEY` | No | Auto Increment | Unique record identifier |
+| `student_id` | `VARCHAR(20)` | `UNIQUE` | No | None | Unique school ID number |
+| `first_name` | `VARCHAR(100)` | None | No | None | Student given name |
+| `middle_name` | `VARCHAR(100)` | None | Yes | `NULL` | Optional middle name or initial |
+| `last_name` | `VARCHAR(100)` | None | No | None | Student family name / surname |
+| `email` | `VARCHAR(255)` | `UNIQUE` | No | None | Unique primary email |
+| `mobile_number` | `VARCHAR(20)` | None | No | None | Contact number |
+| `gender` | `ENUM('Male','Female','Other')` | None | No | None | Gender option |
+| `date_of_birth` | `DATE` | None | No | None | Birth date format (`YYYY-MM-DD`) |
+| `program` | `VARCHAR(100)` | None | No | None | Academic degree program |
+| `year_level` | `VARCHAR(20)` | None | No | None | Academic year standing |
+| `address` | `TEXT` | None | No | None | Complete residential address |
+| `profile_picture` | `VARCHAR(255)` | None | No | None | Relative path in public storage disk |
+| `status` | `ENUM('active','inactive','archived')` | None | No | `'active'` | Student record lifecycle status |
+| `created_at` | `TIMESTAMP` | None | Yes | `NULL` | Record creation timestamp |
+| `updated_at` | `TIMESTAMP` | None | Yes | `NULL` | Record last modified timestamp |
 
 ---
 
-## 6. Flowchart
-
-This flowchart shows the complete user registration process from opening the form to viewing the finished profile:
+## 7. Flowchart
 
 ```mermaid
 flowchart TD
-    A([User Opens Registration Form]) --> B[Display Form: /students/create]
+    A([User Opens Registration Page]) --> B[Display Form: /students/create]
     B --> C[User Fills in Personal, Contact & Academic Details]
     C --> D[User Selects Profile Picture]
-    D --> E[JavaScript FileReader shows Live Image Preview]
+    D --> E[JavaScript FileReader displays Live Image Preview]
     E --> F[User Clicks Submit Button]
     F --> G{Laravel Form Request Validation}
-
+    
     G -- Has Validation Errors --> H[Redirect Back with Errors & old Input]
-    H --> I[Show Error Summary and Field Error Messages]
+    H --> I[Display Inline Field Errors and Top Error Alert]
     I --> C
-
-    G -- Validation Passed --> J[Save Image to storage/app/public/profile_pictures]
+    
+    G -- Valid Data --> J[Save Image to storage/app/public/profile_pictures]
     J --> K[Insert Record into MySQL students table]
-    K --> L[Flash Success Message to Session]
+    K --> L[Flash Success Message into Session]
     L --> M[Redirect to Student Profile Page: /students/id]
-    M --> N([Display Profile with Uploaded Picture & Details])
+    M --> N([Display Profile Page with Uploaded Photo & Details])
 ```
 
 ---
 
-## 7. Screenshots
+## 8. Screenshots
 
-Screenshots of the working application are stored in the [`screenshots/`](screenshots/) directory:
+*(Screenshots are saved in the `screenshots/` directory for submission)*
 
-1. **`01_registration_form.png`** — Student registration form with categorized sections and photo upload box.
-2. **`02_validation_errors.png`** — Form with validation errors triggered (inline red field messages and summary box).
-3. **`03_flash_success.png`** — Success alert banner after registering a student.
-4. **`04_student_profile.png`** — Student details page showing the uploaded profile image, student ID, and info cards.
-5. **`05_student_list.png`** — Student list table with search bar, program/year filters, and status badges.
-6. **`06_dashboard.png`** — Dashboard overview with total counts, program breakdown, and recent registrations.
-7. **`07_print_summary.png`** — Print summary preview formatted for printing/PDF export.
-
----
-
-## 8. Problems Encountered & Solutions
-
-During development and testing, here are the main problems we encountered and how we fixed them:
-
-### 1. Uploaded Profile Pictures Not Displaying (404 Error)
-
-- **Problem**: When a student was registered, their image path was saved in MySQL, but the image showed a broken image icon on the profile page.
-- **Solution**: Laravel stores public files under `storage/app/public`, which is not directly accessible by default. We ran `php artisan storage:link` to create a symlink from `public/storage` to `storage/app/public` and referenced pictures using `asset('storage/' . $student->profile_picture)`.
-
-### 2. MySQL Connection Access Denied Error
-
-- **Problem**: While running migrations, Laravel threw `SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)`.
-- **Solution**: The local MySQL service had a root password configured. We updated `DB_PASSWORD` in `.env` to match the local MySQL password, created the `student_registration` database schema, and ran `php artisan config:clear` so Laravel picked up the updated configuration.
-
-### 3. Unique Validation Failing When Editing a Student
-
-- **Problem**: When updating an existing student's record without changing their Student ID or email, Laravel's `unique` validation threw an error claiming the ID/email was already taken.
-- **Solution**: In `UpdateStudentRequest`, we used `Rule::unique('students', 'student_id')->ignore($studentId)` so Laravel ignores the current student's record when validating uniqueness during edits.
-
-### 4. Replacing Old Profile Pictures on Update
-
-- **Problem**: When a student uploaded a new photo during profile editing, the new file was uploaded, but the old file remained on disk, wasting storage space over time.
-- **Solution**: In `StudentController@update`, we checked if a new file was uploaded and deleted the previous photo file from storage using `Storage::disk('public')->delete($student->profile_picture)` before saving the new path.
+1. **Registration Form**: `screenshots/01_registration_form.png` — Form layout with input fields and photo upload box.
+2. **Validation Errors**: `screenshots/02_validation_errors.png` — Inline error messages below invalid fields and error summary alert at top.
+3. **Successful Registration**: `screenshots/03_flash_success.png` — Flash banner notification confirming student registration.
+4. **Flash Message**: `screenshots/03_flash_success.png` — Dismissible green success notification banner.
+5. **Uploaded Profile Picture**: `screenshots/04_student_profile.png` — Student profile card showing the rendered profile image from storage.
+6. **Database Table**: `screenshots/06_database_table.png` — phpMyAdmin / MySQL Workbench view of the `students` table data.
+7. **Student Profile Page**: `screenshots/04_student_profile.png` — Detailed student profile view.
+8. **VS Code Project Structure**: `screenshots/07_vscode_structure.png` — Project directory tree in VS Code editor.
+9. **GitHub Repository**: `screenshots/08_github_repo.png` — GitHub repository page with commits and documentation.
 
 ---
 
-## 9. Reflection
+## 9. Problems Encountered
 
-Working on this Week 4 Student Registration System helped me understand how full-stack client-server web applications operate in Laravel.
+During the development and testing of this project, I encountered several practical challenges:
 
-First, I learned the importance of **server-side validation**. While frontend HTML validation is good for quick user feedback, client-side checks can be bypassed easily. Laravel's Form Requests allowed us to strictly validate data types, string lengths, date ranges, and unique database constraints before anything reaches the controller or database.
+1. **Broken Profile Picture Links (404 Not Found)**:  
+   After successfully uploading a photo, the image path was stored in MySQL, but the profile page showed a broken image icon because files stored in `storage/app/public` are not accessible directly from the browser by default.
 
-Second, I gained hands-on experience with **file upload handling and Laravel Storage**. I learned that storing raw binary files inside a database is bad practice because it bloats database size and slows down queries. Instead, saving the file to the filesystem (`storage/app/public`) and saving only the relative file path in MySQL makes the application clean, secure, and performant.
+2. **MySQL Connection Access Denied (`1045 Access Denied`)**:  
+   When running database migrations, Laravel threw an exception: `SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)`. This was caused by the local MySQL root user having a password set while the `.env` file had an empty `DB_PASSWORD=`.
 
-Lastly, building features like live image previews with JavaScript, reusable Blade components, search filtering, and test cases gave me a much clearer picture of how real-world university portals are designed and maintained.
+3. **Unique Validation Failing During Student Edit**:  
+   When building the student edit feature, submitting the form without changing the Student ID or email triggered validation errors saying the Student ID/email was already taken, because Laravel was comparing the input against the student's own existing database record.
 
----
-
-## 10. References
-
-- Laravel 13 Documentation — [Validation & Form Requests](https://laravel.com/docs/validation)
-- Laravel 13 Documentation — [File Storage & Public Disks](https://laravel.com/docs/filesystem)
-- Laravel 13 Documentation — [Eloquent ORM & Migrations](https://laravel.com/docs/eloquent)
-- PHP Documentation — [File Uploads Handling](https://www.php.net/manual/en/features.file-upload.php)
-- MySQL Reference Manual — [Data Types & Constraints](https://dev.mysql.com/doc/refman/8.0/en/)
-- Tailwind CSS Docs — [Form Elements & Responsive Utilities](https://tailwindcss.com/docs)
+4. **Orphaned Profile Images When Updating Photos**:  
+   When a student uploaded a new replacement photo on the edit page, the new image was saved, but the old image file remained in storage, creating orphaned unused files on the server.
 
 ---
 
-## 11. Setup Instructions
+## 10. Solutions
 
-To run this project locally on Windows:
+Here is how each problem was solved:
 
-```powershell
-# 1. Clone the repository and navigate into the folder
-git clone https://github.com/ejrdeleon/week04-student-registration.git
-cd week04-student-registration
+1. **Fixing Broken Image Links**:  
+   Ran `php artisan storage:link` in the terminal to create a symbolic link from `public/storage` to `storage/app/public`. In Blade templates, referenced images using `asset('storage/' . $student->profile_picture)`.
 
-# 2. Install PHP and Composer dependencies
-composer install
+2. **Resolving MySQL Access Denied**:  
+   Updated the `.env` file with the correct MySQL credentials (`DB_PASSWORD=4110`), created the `student_registration` database schema in MySQL, and ran `php artisan config:clear` so Laravel refreshed its cached settings.
 
-# 3. Setup the environment file
-copy .env.example .env
-php artisan key:generate
+3. **Fixing Unique Validation on Edit**:  
+   Created a separate `UpdateStudentRequest` class that uses Laravel's `Rule::unique('students', 'student_id')->ignore($studentId)` to tell the validator to ignore the current student's record when checking uniqueness during updates.
 
-# 4. In your .env file, ensure your MySQL settings are correct:
-# DB_CONNECTION=mysql
-# DB_HOST=127.0.0.1
-# DB_PORT=3306
-# DB_DATABASE=student_registration
-# DB_USERNAME=root
-# DB_PASSWORD=your_mysql_password
-
-# 5. Create the storage symlink for uploaded profile photos
-php artisan storage:link
-
-# 6. Run migrations and seed fictional student records
-php artisan migrate:fresh --seed
-
-# 7. Install node packages & build frontend assets
-npm install
-npm run build
-
-# 8. Start local development servers
-# Terminal 1:
-npm run dev
-
-# Terminal 2:
-php artisan serve
-```
-
-Open your browser and visit: **`http://localhost:8000`**
-
-To run the automated PHPUnit feature tests:
-
-```powershell
-php artisan test
-```
+4. **Cleaning Up Old Files on Photo Replacement**:  
+   In `StudentController@update()`, added a check: if a new file is uploaded and the existing photo is not the default placeholder, `Storage::disk('public')->delete($student->profile_picture)` is executed to delete the old file before saving the new photo.
 
 ---
 
-## 12. Features & Enhancements Summary
+## 11. Reflection
 
-| Feature               | Base Laboratory Requirement                 | How It Is Implemented in this Project                                                     |
-| --------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| **Registration Form** | Blade form with required student fields     | Sectioned layout (Personal, Contact, Academic, Photo) with live JS preview                |
-| **Server Validation** | Controller-level validation                 | Dedicated `StoreStudentRequest` & `UpdateStudentRequest` with custom messages             |
-| **Profile Picture**   | Upload photo stored in `storage/app/public` | Validated (JPG/PNG max 2MB), saved via Laravel Storage, displayed on profile              |
-| **Database**          | MySQL `students` table                      | MySQL table with all required fields + `status` column (`active`, `inactive`, `archived`) |
-| **Flash Messages**    | Show success/error notifications            | Auto-dismissing flash alerts with icons for success and errors                            |
-| **Student Profile**   | View registered student details             | Profile card with avatar display, status badge, and printable summary view                |
-| **Student List**      | Basic student list                          | Table with search bar (ID/name/email), Program/Year Level filters, and pagination         |
-| **Student Edit**      | Standard update capability                  | Edit view with pre-filled inputs, status updater, and photo replacement                   |
-| **Dashboard**         | Not strictly required                       | Overview dashboard showing enrollment stats, program distribution, and recent list        |
-| **Automated Tests**   | Default tests                               | 14 Feature tests testing validation, uploads, duplicate rejection, and CRUD actions       |
+Working on the Week 4 Student Registration System provided me with valuable hands-on experience in building a complete client-server web application using Laravel and MySQL.
+
+The most important lesson I learned is the critical importance of **server-side validation**. While frontend validation (such as HTML `required` attributes or JavaScript alerts) provides a quick and smooth user experience, it can easily be bypassed by disabling JavaScript or using tools like Postman. Server-side validation acts as the true defense layer of an application, guaranteeing that only clean, well-formatted, and safe data reaches the database. Using Laravel's Form Request classes made this process clean and organized by keeping validation rules separate from controller logic.
+
+I also learned the correct way to handle **file uploads and file security**. In my earlier programming exercises, I thought about storing images directly as binary BLOB data inside the database. However, this project taught me that storing files on the server filesystem (`storage/app/public`) and saving only the relative file path string in MySQL is much more efficient. It keeps the database lightweight and fast. Furthermore, restricting uploads to specific MIME types (`jpg`, `jpeg`, `png`) and enforcing a 2MB size limit is essential to protect the server from disk exhaustion and malicious file execution attacks.
+
+In real-world enterprise applications, registration systems serve as the core entry point for user identity and data consistency. Experiencing how Laravel connects Blade views, Form Requests, Controllers, Eloquent ORM, and MySQL migrations helped me understand how modern web frameworks streamline full-stack development while maintaining high standards of data integrity and security.
+
+---
+
+## 12. References
+
+American Psychological Association (APA 7th Edition) References:
+
+- Laravel. (2026). *Laravel documentation: Validation and Form Requests*. Laravel. https://laravel.com/docs/validation
+- Laravel. (2026). *Laravel documentation: File storage and public disks*. Laravel. https://laravel.com/docs/filesystem
+- Laravel. (2026). *Laravel documentation: Eloquent ORM and database migrations*. Laravel. https://laravel.com/docs/eloquent
+- MDN Web Docs. (2026). *Using files from web applications and FileReader API*. Mozilla. https://developer.mozilla.org/en-US/docs/Web/API/File_API/Using_files_from_web_applications
+- MySQL. (2026). *MySQL 8.0 reference manual: Data types and table constraints*. Oracle Corporation. https://dev.mysql.com/doc/refman/8.0/en/
+- PHP Documentation Group. (2026). *PHP manual: Handling file uploads and POST method uploads*. The PHP Group. https://www.php.net/manual/en/features.file-upload.post-method.php
+- Tailwind Labs. (2026). *Tailwind CSS documentation: Utility-first CSS framework*. Tailwind Labs. https://tailwindcss.com/docs
