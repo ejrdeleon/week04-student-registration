@@ -315,12 +315,6 @@ When editing an existing student, the Student ID and email were being reported a
 
 The validator was checking the current student's own record as if it belonged to another student.
 
-### 4. Old Profile Pictures Were Not Deleted
-
-When replacing a student's profile picture, the new image was uploaded successfully, but the old image remained inside the storage folder.
-
-Over time, this could leave unused files on the server.
-
 ---
 
 ## 10. Solutions
@@ -372,18 +366,6 @@ Rule::unique('students', 'student_id')->ignore($studentId)
 ```
 
 This allows a student to keep the same Student ID while still preventing another student from using it.
-
-### 4. Removing Old Profile Pictures
-
-When a new profile picture is uploaded during an edit, the old image is deleted before the new image is saved.
-
-The storage disk is used to remove the old file:
-
-```php
-Storage::disk('public')->delete($student->profile_picture);
-```
-
-This prevents unused profile pictures from accumulating in the storage directory.
 
 ---
 
