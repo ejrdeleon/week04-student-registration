@@ -140,7 +140,7 @@ The validation rules are handled by Laravel before the information reaches the c
 
 The main table used by the registration system is the `students` table.
 
-![Database ER Diagram](images/er-diagram.png)
+![Database ER Diagram](documentation/er-diagram.png)
 
 ### Students Table Structure
 
@@ -171,7 +171,7 @@ The `id` column is the primary key and is automatically incremented. The `studen
 
 The registration process follows this flow:
 
-![Registration Flowchart](images/registration-flowchart.png)
+![Registration Flowchart](documentation/registration-flowchart.png)
 
 ### Registration Process
 
