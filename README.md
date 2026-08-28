@@ -142,27 +142,6 @@ The main table used by the registration system is the `students` table.
 
 ![Database ER Diagram](documentation/er-diagram.png)
 
-### Students Table Structure
-
-| Column            | Data Type       | Key         | Nullable | Description                   |
-| ----------------- | --------------- | ----------- | -------- | ----------------------------- |
-| `id`              | BIGINT UNSIGNED | Primary Key | No       | Unique record ID              |
-| `student_id`      | VARCHAR(20)     | Unique      | No       | School Student ID             |
-| `first_name`      | VARCHAR(100)    | —           | No       | Student first name            |
-| `middle_name`     | VARCHAR(100)    | —           | Yes      | Student middle name           |
-| `last_name`       | VARCHAR(100)    | —           | No       | Student surname               |
-| `email`           | VARCHAR(255)    | Unique      | No       | Student email                 |
-| `mobile_number`   | VARCHAR(20)     | —           | No       | Contact number                |
-| `gender`          | ENUM            | —           | No       | Male, Female, or Other        |
-| `date_of_birth`   | DATE            | —           | No       | Student birth date            |
-| `program`         | VARCHAR(100)    | —           | No       | Degree program                |
-| `year_level`      | VARCHAR(20)     | —           | No       | Current year level            |
-| `address`         | TEXT            | —           | No       | Complete home address         |
-| `profile_picture` | VARCHAR(255)    | —           | No       | Stored image path             |
-| `status`          | ENUM            | —           | No       | Active, inactive, or archived |
-| `created_at`      | TIMESTAMP       | —           | Yes      | Date record was created       |
-| `updated_at`      | TIMESTAMP       | —           | Yes      | Date record was updated       |
-
 The `id` column is the primary key and is automatically incremented. The `student_id` and `email` columns have unique constraints so that duplicate student records cannot use the same values.
 
 ---
@@ -196,57 +175,51 @@ The following screenshots should be included in the `screenshots/` folder.
 
 ### 1. Registration Form
 
-`01_registration_form.png`
+`registration-form.png`
 
 Shows the main student registration form, including the personal information fields and profile picture upload.
 
 ### 2. Validation Errors
 
-`02_validation_errors.png`
+`validation-errors.png`
 
 Shows the validation messages displayed when incorrect or incomplete information is submitted.
 
-### 3. Successful Registration
+### 3. Successful Registration, 4. Flash Message, 5. Uploaded Profile Picture, 7. Student Profile Page
 
-`03_flash_success.png`
+`Flash-Success-Message.png`
 
 Shows the success notification after a student has been successfully registered.
 
-### 4. Flash Message
-
-`03_flash_success.png`
-
 Shows the dismissible success message displayed after registration.
-
-### 5. Uploaded Profile Picture
-
-`04_student_profile.png`
 
 Shows the student's profile page with the uploaded image.
 
+Shows the complete student profile and registered information.
+
 ### 6. Database Table
 
-`06_database_table.png`
+`database.png`
 
 Shows the `students` table and the registered student information in MySQL or phpMyAdmin.
 
-### 7. Student Profile Page
+### 8. Laravel Project Structure
 
-`04_student_profile.png`
-
-Shows the complete student profile and registered information.
-
-### 8. VS Code Project Structure
-
-`07_vscode_structure.png`
+`laravel-structure.png`
 
 Shows the Laravel project folders and files inside VS Code.
 
 ### 9. GitHub Repository
 
-`08_github_repo.png`
+`github-repo.png`
 
 Shows the project's GitHub repository, commits, and documentation.
+
+### 10. Browser Output
+
+`browser-output.png`
+
+Shows the project's web output and homepage .
 
 ---
 
