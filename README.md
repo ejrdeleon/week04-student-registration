@@ -63,21 +63,7 @@ When a user registers a student, the request passes through several parts of the
 
 The general process is:
 
-```text
-Browser
-   ↓
-Route
-   ↓
-Validation
-   ↓
-Controller
-   ↓
-Storage / Model
-   ↓
-MySQL Database
-   ↓
-Response / View
-```
+![Laravel Request Lifecycle](documentation/request-lifecycle.png)
 
 ### Step-by-Step Process
 
@@ -154,36 +140,7 @@ The validation rules are handled by Laravel before the information reaches the c
 
 The main table used by the registration system is the `students` table.
 
-```mermaid
-erDiagram
-    STUDENTS {
-        bigint id PK
-        string student_id UK
-        string first_name
-        string middle_name
-        string last_name
-        string email UK
-        string mobile_number
-        enum gender
-        date date_of_birth
-        string program
-        string year_level
-        text address
-        string profile_picture
-        enum status
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    USERS {
-        bigint id PK
-        string name
-        string email UK
-        string password
-        timestamp created_at
-        timestamp updated_at
-    }
-```
+![Database ER Diagram](images/er-diagram.png)
 
 ### Students Table Structure
 
@@ -213,6 +170,8 @@ The `id` column is the primary key and is automatically incremented. The `studen
 ## 7. Flowchart
 
 The registration process follows this flow:
+
+![Registration Flowchart](images/registration-flowchart.png)
 
 ### Registration Process
 
