@@ -181,7 +181,7 @@ Shows the main student registration form, including the personal information fie
 
 ### 2. Validation Errors
 
-![Validation Errors](screenshot/validation-errors.png)
+![Validation Errors](screenshots/validation-errors.png)
 
 Shows the validation messages displayed when incorrect or incomplete information is submitted.
 
