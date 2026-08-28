@@ -175,19 +175,19 @@ The following screenshots should be included in the `screenshots/` folder.
 
 ### 1. Registration Form
 
-`registration-form.png`
+![Registration Form](screenshots/registration-form.png)
 
 Shows the main student registration form, including the personal information fields and profile picture upload.
 
 ### 2. Validation Errors
 
-`validation-errors.png`
+![Validation Errors](screenshot/validation-errors.png)
 
 Shows the validation messages displayed when incorrect or incomplete information is submitted.
 
 ### 3. Successful Registration, 4. Flash Message, 5. Uploaded Profile Picture, 7. Student Profile Page
 
-`Flash-Success-Message.png`
+![3. Successful Registration, 4. Flash Message, 5. Uploaded Profile Picture, 7. Student Profile Page](screenshots/Flash-Success-Message.png)
 
 Shows the success notification after a student has been successfully registered.
 
@@ -199,25 +199,25 @@ Shows the complete student profile and registered information.
 
 ### 6. Database Table
 
-`database.png`
+![Database Table](screenshots/database.png)
 
 Shows the `students` table and the registered student information in MySQL or phpMyAdmin.
 
 ### 8. Laravel Project Structure
 
-`laravel-structure.png`
+![Laravel Project Structure](screenshots/laravel-structure.png)
 
 Shows the Laravel project folders and files inside VS Code.
 
 ### 9. GitHub Repository
 
-`github-repo.png`
+![GitHub Repository](screenshots/github-repo.png)
 
 Shows the project's GitHub repository, commits, and documentation.
 
 ### 10. Browser Output
 
-`browser-output.png`
+![Browser Output](screenshots/browser-output.png)
 
 Shows the project's web output and homepage .
 
